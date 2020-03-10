@@ -1,0 +1,16 @@
+{
+  "name": "b2d-test-app",
+  "version": "1.0.0",
+  "description": "Barn2Door take home test.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dylan Larrivee",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.2",
+    "path": "^0.12.7"
+  }
+}

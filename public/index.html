@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>DL B2D Take Home</title>
+
+    <link rel="icon" 
+      type="image/png" 
+      href="./img/b2d-logo.png">
+
+    <!-- Required Stylesheets -->
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="./css/bootstrap.css"
+    />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="./css/bootstrap-vue.css"
+    />
+    <!-- Load polyfills to support older browsers -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+    <!-- Required scripts -->
+    <script src="./js/vue.js"></script>
+    <script src="./js/bootstrap-vue.js"></script>
+    <script src="./js/jquery-min.js"></script>
+  </head>
+  <body>
+    <!-- Our application root element -->
+    <div id="app">
+      <b-container>
+        <div>
+          <b-navbar toggleable="lg" type="dark" variant="info">
+            <b-navbar-brand href="https://www.barn2door.com/"
+              >Barn2Door</b-navbar-brand
+            >
+            <b-navbar-brand
+              >- Inventory Search Tool</b-navbar-brand
+            >
+            <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+            <b-collapse id="nav-collapse" is-nav>
+              <!-- Right aligned nav items -->
+              <b-navbar-nav class="ml-auto">
+                <!-- Movie Search bar -->
+                <b-navbar>
+                  <b-input
+                    size="sm"
+                    class="mr-sm-2"
+                    placeholder="Search"
+                    v-model="search"
+                    @keydown="$event.keyCode === 13 ? onSearchClick() : false"
+                  ></b-input>
+                  <b-button
+                    v-on:click="onSearchClick()"
+                    size="sm"
+                    class="my-2 my-sm-0"
+                    >Search</b-button
+                  >
+                </b-navbar>
+              </b-navbar-nav>
+            </b-collapse>
+          </b-navbar>
+        </div>
+        <div>
+          <div v-if="searchClick == 1">
+          <h1>Enter in search criteria above</h1>
+        </div>
+        <div v-if="searchClick == 2 && foundProducts.length == 0"> 
+          <h1>Sorry we can't find that. <br/> Please try a new search keyword.</h1>
+          </div>
+        <div v-if="searchClick == 2 && foundProducts.length > 0">
+          <h1>Your Search Results:</h1>
+        </div>
+        <!-- Media cards-->
+        <div>
+          <b-card-group deck>
+            <div v-for="product in foundProducts">
+              <b-card
+                :title="product.title"
+                :img-src="(product.img ? product.img : 'img/no-image.jpg')"
+                img-alt="Image"
+                img-top
+                tag="article"
+                style="min-width: 20rem; max-width: 20rem; min-height: 30rem; max-height: 30rem;"
+                class="mb-2"
+              >
+                <b-card-text>
+                  {{product.description}}
+                </b-card-text>
+                <b-button href="#" variant="primary">Order Now</b-button>
+              </b-card>
+            </div>
+          </b-card-group>
+        </div>
+      </div> 
+      </b-container>
+    </div>
+    <!-- Vue.js code -->
+    <script>
+      window.app = new Vue({
+        el: "#app",
+        data: {
+          productData: [],
+          search: "",
+          hasLoadedProducts: false,
+          searchClick: 1,
+          foundProducts: []
+        },
+        created: function() {
+          let url = "/GET/example-data";
+          let this_app = this;
+          $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: url,
+            cache: false,
+            success: function(data) {
+              console.log("get product data sucess");
+              this_app.productData = data["items"];
+              this_app.hasLoadedProducts = true;
+            },
+            error: function(xhr) {
+              console.log(xhr);
+            }
+          });
+        },
+        methods: {
+          onSearchClick: function() {
+            this.searchClick = true;
+            this.searchClick = 2;
+            
+            this.foundProducts = this.productData.filter(product => {
+              if (this.search === "") {
+                return false
+              }
+              if (
+                product.title &&
+                product.title.toLowerCase().includes(this.search.toLowerCase())
+              ) {
+                console.log(product.title)
+                return true;
+              }
+              if (
+                product.description &&
+                product.description
+                  .toLowerCase()
+                  .includes(this.search.toLowerCase())
+              ) {
+                return true;
+              }
+
+              for (let i = 0; i < product.categories.length; i++) {
+                if (
+                  product.categories[i].name &&
+                  product.categories[i].name
+                    .toLowerCase()
+                    .includes(this.search.toLowerCase())
+                ) {
+                  return true;
+                }
+                if (
+                  product.categories[i].subcategory &&
+                  product.categories[i].subcategory.name
+                    .toLowerCase()
+                    .includes(this.search.toLowerCase())
+                ) {
+                  return true;
+                }
+              }
+            });
+            this.search = "";
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
